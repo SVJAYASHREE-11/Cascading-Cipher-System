@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Encryption and Decryption</title>
+    <style>
+      body {
+            margin: 0;
+            padding: 0;
+            background-image: url('https://t4.ftcdn.net/jpg/05/50/95/87/360_F_550958748_OeGcRonEUNoVhd0wjd9zSEMhLFIGO9Bt.jpg'); /* Replace with your image URL */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: Arial, sans-serif;
+            color: #fff;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .column {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            width: 300px;
+            text-align: center;
+            border: 2px solid #333; /* Dark border */
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            resize: none;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #007BFF;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Modern form design */
+        .form-label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .form-button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <h2>Encryption</h2>
+            <label for="encryptInput" class="form-label">Enter your message:</label>
+            <textarea id="encryptInput" class="form-input" placeholder="Enter your message"></textarea>
+            <button onclick="encrypt()" class="form-button">Encrypt</button>
+            <h2>Encrypted Message</h2>
+            <textarea id="encryptedOutput" class="form-input" readonly></textarea>
+        </div>
+        <div class="column">
+            <h2>Decryption</h2>
+            <label for="decryptInput" class="form-label">Enter the encrypted message:</label>
+            <textarea id="decryptInput" class="form-input" placeholder="Enter the encrypted message"></textarea>
+            <button onclick="decrypt()" class="form-button">Decrypt</button>
+            <h2>Decrypted Message</h2>
+            <textarea id="decryptedOutput" class="form-input" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Function to perform Caesar Cipher encryption in JavaScript
+        function caesarCipher(text, key) {
+            return text.replace(/[a-zA-Z]/g, function (ch) {
+                const base = ch === ch.toLowerCase() ? 'a' : 'A';
+                return String.fromCharCode(((ch.charCodeAt(0) - base.charCodeAt(0) + key) % 26) + base.charCodeAt(0));
+            });
+        }
+
+        // Function to perform Monoalphabetic Cipher encryption in JavaScript
+        function monoalphabeticCipher(text, encryptKey) {
+            return text.split('').map(function (ch) {
+                if (/[a-zA-Z]/.test(ch)) {
+                    const index = encryptKey.indexOf(ch);
+                    return index >= 0 ? encryptKey[index] : ch;
+                }
+                return ch;
+            }).join('');
+        }
+
+        // Function to perform Autokey Cipher encryption in JavaScript
+        function autokeyCipher(text, key) {
+            let encryptedText = '';
+            let keyIndex = 0;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (/[a-zA-Z]/.test(char)) {
+                    const keyChar = key[keyIndex % key.length];
+                    encryptedText += caesarCipher(char, keyChar.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0));
+                    keyIndex++;
+                } else {
+                    encryptedText += char;
+                }
+            }
+            return encryptedText;
+        }
+
+        function encrypt() {
+            const plaintext = document.getElementById('encryptInput').value;
+            let encryptedText = plaintext;
+
+            // Caesar Cipher encryption with shift 3
+            encryptedText = caesarCipher(encryptedText, 3);
+
+            // Customize your Monoalphabetic key here (use the same key for encryption and decryption)
+            const monoalphabeticKey = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+            encryptedText = monoalphabeticCipher(encryptedText, monoalphabeticKey);
+
+            // Customize your Autokey here
+            encryptedText = autokeyCipher(encryptedText, "KEYUPPER");
+
+            document.getElementById('encryptedOutput').value = encryptedText;
+        }
+
+        // Function to perform Caesar Cipher decryption in JavaScript
+        function caesarDecipher(text, key) {
+            return caesarCipher(text, 26 - key);
+        }
+
+        // Function to perform Monoalphabetic Cipher decryption in JavaScript
+        function reverseMonoalphabeticCipher(text, encryptKey) {
+            return text.split('').map(function (ch) {
+                if (/[a-zA-Z]/.test(ch)) {
+                    const index = encryptKey.indexOf(ch);
+                    return index >= 0 ? encryptKey[index] : ch;
+                }
+                return ch;
+            }).join('');
+        }
+
+        // Function to perform Autokey Cipher decryption in JavaScript
+        function reverseAutokeyCipher(text, key) {
+            let decryptedText = '';
+            let keyIndex = 0;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (/[a-zA-Z]/.test(char)) {
+                    const keyChar = key[keyIndex % key.length];
+                    decryptedText += caesarDecipher(char, keyChar.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0));
+                    keyIndex++;
+                } else {
+                    decryptedText += char;
+                }
+            }
+            return decryptedText;
+        }
+
+        function decrypt() {
+            const ciphertext = document.getElementById('decryptInput').value;
+            let decryptedText = ciphertext;
+
+            // Customize your Autokey here
+            const autokey = "KEYUPPER";
+
+            // Reverse Autokey Cipher
+            decryptedText = reverseAutokeyCipher(decryptedText, autokey);
+            
+            // Reverse Monoalphabetic Cipher (use the same key as used for encryption)
+            const monoalphabeticKey = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+            decryptedText = reverseMonoalphabeticCipher(decryptedText, monoalphabeticKey);
+
+            // Caesar Cipher decryption with shift 3
+            decryptedText = caesarDecipher(decryptedText, 3);
+
+            document.getElementById('decryptedOutput').value = decryptedText;
+        }
+    </script>
+</body>
+</html>
